@@ -1,0 +1,47 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+
+<body>
+    <h1>Static Page</h1>
+    <button id="start-stream-button">Start Event Stream</button>
+    <div id="output"></div>
+    <script>
+        var actionButton = document.querySelector("#start-stream-button");
+        var globalCounter = 0;
+        actionButton.addEventListener("click", function (e) {
+            var eventSource = new EventSource("/");
+            eventSource.onmessage = function (e) {
+                globalCounter++;
+                var data = JSON.parse(e.data);
+                showCircleLineStatus(data[0]);
+            };
+            eventSource.onerror = function (e) {
+                console.log("error", e);
+            };
+            eventSource.addEventListener("ping", function (e) {
+                console.log("ping results:", e);
+            });
+        });
+
+        function showCircleLineStatus(data) {
+            var html = [
+                "<h1>Date[", new Date() ,"]:", globalCounter, "</h1>",
+                "<h2>Line:", data.name, "</h2>",
+                "<p>Created:", data.created, "</p>",
+                "<p>Modified:", data.modified, "</p>",
+                "<p>Disruptions:", (data.disruptions.length === 0 ? " no known disruptions" : " has issues with service"), "</p>"
+            ];
+
+            document.getElementById("output").innerHTML = html.join("");
+        }
+    </script>
+</body>
+
+</html>
